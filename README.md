@@ -83,7 +83,9 @@ It provides tools for splitting, reordering, resizing, interleaving scanned page
 
 ## Creating an Executable
 
-  pip install pyinstaller
+    ```bash
+    pip install pyinstaller
+    ```
 
 ### Option 1: Folder-based executable (smaller build time)
     python -m PyInstaller --windowed --name "LocalPDF" --icon "hard/path/to/LocalPDF/icon/document-pdf-text.png" --add-data "hard/path/to/LocalPDF/icon;icon" --add-data "hard/path/to/LocalPDF/created_images;created_images" --distpath "hard/path/to/LocalPDF/pyinstaller/V1.1/dist" --workpath "hard/path/to/LocalPDF/pyinstaller/V1.1/build" --specpath "hard/path/to/LocalPDF/pyinstaller/V1.1/spec" app.py
