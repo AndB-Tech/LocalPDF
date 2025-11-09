@@ -83,7 +83,6 @@ It provides tools for splitting, reordering, resizing, interleaving scanned page
 
 ## Creating an Executable
 
-  ```bash
   pip install pyinstaller
 
 ### Option 1: Folder-based executable (smaller build time)
