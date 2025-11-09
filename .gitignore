@@ -1,0 +1,4 @@
+__pycache__/
+pyinstaller/
+git-filter-repo
+*.log
