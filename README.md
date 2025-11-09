@@ -53,7 +53,7 @@ It provides tools for splitting, reordering, resizing, interleaving scanned page
 
 1. Download Release
 2. Unzip the File
-3. Execute PDF_Config.exe
+3. Execute LocalPDF.exe
 
 ### Option 2: Run from Code
 
