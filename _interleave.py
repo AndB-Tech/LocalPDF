@@ -1,39 +1,24 @@
-import sys, os
+import os
 from pypdf import PdfWriter, PdfReader
 from itertools import zip_longest
+from _baseWindow import BaseWindow
 from PyQt6.QtCore import (
-    QSize, 
     Qt,
     pyqtSlot
 )
-from PyQt6.QtGui import (
-    QIcon
-)
 from PyQt6.QtWidgets import (
     QApplication, 
-    QMainWindow, 
     QPushButton, 
     QLabel, 
     QVBoxLayout, 
     QHBoxLayout,
     QWidget,
-    QStatusBar,
     QFileDialog,
     QLineEdit,
     QGraphicsOpacityEffect,
     QMessageBox,
     QDoubleSpinBox
 )
-
-
-class BaseWindow(QMainWindow):
-    """Base window class with shared setup."""
-    def __init__(self, title: str, width: int):
-        super().__init__()
-        self.setWindowTitle(title)
-        self.setFixedWidth(width)
-        self.setWindowIcon(QIcon("./icon/document-pdf-text.png"))
-        self.setStatusBar(QStatusBar(self))
 
 class InterleavePagesWindow(BaseWindow):
     def __init__(self, parent=None):

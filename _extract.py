@@ -1,27 +1,20 @@
-import sys, os, fitz
+import os, fitz
 from pypdf import PdfReader, PdfWriter
 from datetime import datetime
+from _baseWindow import BaseWindow
 from PyQt6.QtCore import (
     QSize, 
     Qt,
-    QModelIndex,
     pyqtSlot
 )
-from PyQt6.QtGui import (
-    QIcon,
-    QPixmap, 
-    QStandardItemModel, 
-    QStandardItem
-)
+from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (
     QApplication, 
-    QMainWindow, 
     QPushButton, 
     QLabel, 
     QVBoxLayout, 
     QHBoxLayout,
     QWidget,
-    QStatusBar,
     QListWidget,
     QListWidgetItem,
     QListView,
@@ -30,15 +23,6 @@ from PyQt6.QtWidgets import (
     QGraphicsOpacityEffect,
     QMessageBox
 )
-
-class BaseWindow(QMainWindow):
-    """Base window class with shared setup."""
-    def __init__(self, title: str, width: int):
-        super().__init__()
-        self.setWindowTitle(title)
-        self.setFixedWidth(width)
-        self.setWindowIcon(QIcon("./icon/document-pdf-text.png"))
-        self.setStatusBar(QStatusBar(self))
 
 class ExtractPagesWindow(BaseWindow):
     def __init__(self, parent=None):

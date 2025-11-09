@@ -1,39 +1,27 @@
-import sys, os, subprocess, fitz
+import sys, os, fitz
+from _baseWindow import BaseWindow
 
 from PyQt6.QtCore import (
-    QSize, 
     Qt,
     pyqtSlot
 )
 from PyQt6.QtGui import (
-    QIcon,
     QKeySequence,
     QShortcut
 )
 from PyQt6.QtWidgets import (
     QApplication, 
-    QMainWindow, 
     QPushButton, 
     QLabel, 
     QVBoxLayout, 
     QHBoxLayout,
     QWidget,
-    QStatusBar,
     QFileDialog,
     QGraphicsOpacityEffect,
     QLineEdit,
     QDoubleSpinBox,
     QMessageBox
 )
-
-class BaseWindow(QMainWindow):
-    """Base window class with shared setup."""
-    def __init__(self, title: str, width: int):
-        super().__init__()
-        self.setWindowTitle(title)
-        self.setFixedWidth(width)
-        self.setWindowIcon(QIcon("./icon/document-pdf-text.png"))
-        self.setStatusBar(QStatusBar(self))
 
 class ResizePdfWindow(BaseWindow):
     def __init__(self, parent=None):

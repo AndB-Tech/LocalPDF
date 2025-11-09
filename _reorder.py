@@ -1,7 +1,8 @@
-import sys, os
+import os
 from datetime import datetime
 import fitz
 from pypdf import PdfWriter, PdfReader
+from _baseWindow import BaseWindow
 from PyQt6.QtCore import (
     QSize, 
     Qt,
@@ -16,15 +17,11 @@ from PyQt6.QtGui import (
 )
 from PyQt6.QtWidgets import (
     QApplication, 
-    QMainWindow, 
     QPushButton, 
     QLabel, 
     QVBoxLayout, 
     QHBoxLayout,
     QWidget,
-    QStatusBar,
-    QListWidget,
-    QListWidgetItem,
     QListView,
     QFileDialog,
     QGraphicsOpacityEffect,
@@ -32,16 +29,6 @@ from PyQt6.QtWidgets import (
     QDoubleSpinBox,
     QMessageBox
 )
-
-
-class BaseWindow(QMainWindow):
-    """Base window class with shared setup."""
-    def __init__(self, title: str, width: int):
-        super().__init__()
-        self.setWindowTitle(title)
-        self.setFixedWidth(width)
-        self.setWindowIcon(QIcon("./icon/document-pdf-text.png"))
-        self.setStatusBar(QStatusBar(self))
 
 class ReorderableImageModel(QStandardItemModel):
     """Custom model that ensures drag-drop reordering never deletes items."""

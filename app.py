@@ -1,25 +1,14 @@
 import sys, os
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import (
-    QApplication, QMainWindow, QPushButton, QLabel,
-    QVBoxLayout, QWidget, QStatusBar
-)
+from PyQt6.QtWidgets import QApplication, QPushButton, QLabel, QVBoxLayout, QHBoxLayout, QWidget
 
+from _baseWindow import BaseWindow
 from _reorder import ReorderPagesWindow
 from _resize import ResizePdfWindow
 from _extract import ExtractPagesWindow
 from _interleave import InterleavePagesWindow
 from _normalize import NormalizePagesWindow
-
-class BaseWindow(QMainWindow):
-    """Base window class with shared setup."""
-    def __init__(self, title: str, width: int):
-        super().__init__()
-        self.setWindowTitle(title)
-        self.setFixedWidth(width)
-        self.setWindowIcon(QIcon("./icon/document-pdf-text.png"))
-        self.setStatusBar(QStatusBar(self))
 
 class MainWindow(BaseWindow):
     def __init__(self):
@@ -27,6 +16,7 @@ class MainWindow(BaseWindow):
 
         # Layout setup
         layout = QVBoxLayout()
+        layout_trash = QHBoxLayout()
         layout.addWidget(self._create_label("Choose your poison"))
 
         # Button definitions: (label, tooltip, handler)
@@ -41,13 +31,18 @@ class MainWindow(BaseWindow):
         for text, tip, func in buttons:
             layout.addWidget(self._create_button(text, tip, func))
 
+        # button for cleaning up unnecessary data
         button_trash = QPushButton("", self)
         button_trash.setStatusTip("Remove all unnecessary data")  
         button_trash.clicked.connect(self.remove_temp_files)
         button_trash.setFixedWidth(40)
         button_trash.setFixedHeight(40)
-        button_trash.setIcon(QIcon("./icon/bin-metal-full.png"))
-        layout.addWidget(button_trash)
+        button_trash.setIcon(QIcon(self.resource_path("icon/bin-metal-full.png")))
+        layout_trash.addWidget(button_trash)
+        # label to show progress        
+        self.label_status = QLabel("", self)
+        layout_trash.addWidget(self.label_status)
+        layout.addLayout(layout_trash)
 
         container = QWidget()
         container.setLayout(layout)
@@ -102,22 +97,36 @@ class MainWindow(BaseWindow):
     # --- Functions --- 
     # remove all ./created_images/run_* folders
     def remove_temp_files(self):
-        base_path="./created_images"
+        base_path = self.resource_path("created_images")
+        
+        #if not os.path.exists(base_path):
+            #self.label_status.setText(f"No temporary folder found at:\n{base_path} ❌")
+            #return
+
+        removed_any = False
         for item in os.listdir(base_path):
             item_path = os.path.join(base_path, item)
-            if os.path.isdir(item_path):
-                if item.startswith("run_"):
+            if os.path.isdir(item_path) and item.startswith("run_"):
+                try:
                     self.delete_folder(item_path)
-        return
+                    removed_any = True
+                except Exception as e:
+                    self.label_status.setText(f"Error deleting folder {item_path}: {e}")
+        
+        if removed_any:
+            self.label_status.setText('<span style="color: green;">Completed ✅</span>')
+        else:
+            self.label_status.setText('<span style="color: red;">No temporary folders found ❌</span>')
 
-    # delete all files in the given folder
+    # Recursively delete folder contents and the folder itself.
     def delete_folder(self, folder_path):
         for entry in os.listdir(folder_path):
             entry_path = os.path.join(folder_path, entry)
-            os.remove(entry_path)
+            if os.path.isdir(entry_path):
+                self.delete_folder(entry_path)  # recursive deletion for subfolders
+            else:
+                os.remove(entry_path)
         os.rmdir(folder_path)
-        return
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

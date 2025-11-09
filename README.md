@@ -45,6 +45,9 @@ It provides tools for splitting, reordering, resizing, interleaving scanned page
 - **_normalize.py**  
   Normalizes all pages to A4 size.
 
+- **_baseWindows.py**
+  Custom QMainWindow for Application.
+
 ---
 
 ## Installation
@@ -80,11 +83,14 @@ It provides tools for splitting, reordering, resizing, interleaving scanned page
 
 ## Creating an Executable
 
+  ```bash
+  pip install pyinstaller
+
 ### Option 1: Folder-based executable (smaller build time)
     python -m PyInstaller --windowed --name "LocalPDF" --icon "hard/path/to/LocalPDF/icon/document-pdf-text.png" --add-data "hard/path/to/LocalPDF/icon;icon" --add-data "hard/path/to/LocalPDF/created_images;created_images" --distpath "hard/path/to/LocalPDF/pyinstaller/V1.1/dist" --workpath "hard/path/to/LocalPDF/pyinstaller/V1.1/build" --specpath "hard/path/to/LocalPDF/pyinstaller/V1.1/spec" app.py
 
 ### Option 2: Single-file executable (larger size, easier distribution)
-    python -m PyInstaller --onefile --windowed --name "LocalPDF" --icon "hard/path/to/LocalPDF/icon/document-pdf-text.png" --add-data "hard/path/to/LocalPDF/icon;icon" --add-data "hard/path/to/LocalPDF/created_images;created_images" --distpath "hard/path/to/LocalPDF/pyinstaller/V1.1/dist" --workpath "hard/path/to/LocalPDF/pyinstaller/V1.1/build" --specpath "hard/path/to/LocalPDF/pyinstaller/V1.1/spec" app.py
+    python -m PyInstaller --onefile --windowed --name "LocalPDF" --icon "hard/path/to/LocalPDF/icon/document-pdf-text.png" --add-data "hard/path/to/LocalPDF/icon;icon" --add-data "hard/path/to/LocalPDF/created_images;created_images" --distpath "hard/path/to/LocalPDF/pyinstaller/v1.0/dist" --workpath "hard/path/to/LocalPDF/pyinstaller/v1.0/build" --specpath "hard/path/to/LocalPDF/pyinstaller/v1.0/spec" app.py
 
 ---
 
