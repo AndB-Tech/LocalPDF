@@ -31,26 +31,19 @@ It provides tools for splitting, reordering, resizing, interleaving scanned page
   Main window containing all PDF tools.
   
 - **_resize.py**  
-  Handles PDF resizing.  
-  - 27.10.2025: Finished resizing functionality  
-  - 28.10.2025: Input cleanup and edge case handling
+  Handles PDF resizing.
 
 - **_extract.py**  
-  Handles extraction of specific pages.  
-  - 02.11.2025: Extraction completed
+  Handles extraction of specific pages.
 
 - **_reorder.py**  
-  Handles page reordering with a visual viewer.  
-  - 28.10.2025: Started viewer  
-  - 29.10.2025: Reordering finished
+  Handles page reordering with a visual viewer.
 
 - **_interleave.py**  
-  Handles interleaving of uneven/even pages from scans.  
-  - 28.10.2025: Completed interleaving
+  Handles interleaving of uneven/even pages from scans.
 
 - **_normalize.py**  
-  Normalizes all pages to A4 size.  
-  - 02.11.2025: Completed normalization
+  Normalizes all pages to A4 size.
 
 ---
 
