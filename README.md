@@ -45,7 +45,7 @@ It provides tools for splitting, reordering, resizing, interleaving scanned page
 - **_normalize.py**  
   Normalizes all pages to A4 size.
 
-- **_baseWindows.py**
+- **_baseWindows.py**  
   Custom QMainWindow for Application.
 
 ---
