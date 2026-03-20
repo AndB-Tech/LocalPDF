@@ -170,7 +170,8 @@ class ReorderPagesWindow(BaseWindow):
         self.img_wd = "{}/{}/{}/".format(wd, img_folder, session_ident)
         os.makedirs(self.img_wd, exist_ok=True)
         self.image_view = ReorderableImageView([], self.img_wd)
-        self.image_view.setFixedHeight(600)
+        #self.image_view.setFixedHeight(600)
+        self.image_view.setFixedHeight(300)
         layout.addWidget(self.image_view)
         
         # empty space

@@ -26,7 +26,8 @@ from PyQt6.QtWidgets import (
 
 class ExtractPagesWindow(BaseWindow):
     def __init__(self, parent=None):
-        super().__init__("Extract Pages", 840)
+        super().__init__("Extract Pages", 400)
+        #super().__init__("Extract Pages", 840)
         self.parent_window = parent
 
         # Initialize variables        
@@ -70,7 +71,8 @@ class ExtractPagesWindow(BaseWindow):
         self.image_view.setSelectionMode(QListView.SelectionMode.ExtendedSelection)
         self.image_view.setResizeMode(QListView.ResizeMode.Adjust)
         self.image_view.setSpacing(10)
-        self.image_view.setFixedHeight(600)
+        #self.image_view.setFixedHeight(600)
+        self.image_view.setFixedHeight(300)
         layout.addWidget(self.image_view)
 
         # add spacing
