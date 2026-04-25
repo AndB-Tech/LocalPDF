@@ -18,7 +18,7 @@ It provides tools for splitting, reordering, resizing, interleaving scanned page
 
 ## Features
 - **Split PDF**: Extract specific pages from a PDF.
-- **Reorder PDF**: Rearrange pages of up to two PDF visually in a GUI.
+- **Reorder PDF**: Rearrange pages of "unlimited" PDFs visually in a GUI.
 - **Resize PDF**: Change file-size sizes of a PDF.
 - **Interleave Scanned Pages**: Merge even and odd pages from scanned documents.
 - **Normalize Pages**: Resize all pages to A4.
