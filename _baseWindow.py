@@ -15,8 +15,8 @@ class BaseWindow(QMainWindow):
             width = self.screen.width() // 2
             height = self.screen.height() // 2
         elif self.screen.width() < 2000:
-            width = self.screen.width() // 2
-            height = self.screen.height() // 2
+            width = self.screen.width() // 3
+            height = self.screen.height() // 3
 
         #print(f"Screen size: {self.screen.width()}x{self.screen.height()}, Window size: {width}x{height}")
 

@@ -49,7 +49,7 @@ class ReorderableImageView(QListView):
 
         # create the folder for the images with a unique id provided while widget-creation
         self.wd = wd
-        print(self.wd)
+        #print(self.wd)
 
         # Configure the view
         self.setViewMode(QListView.ViewMode.IconMode)
@@ -122,100 +122,97 @@ class ReorderPagesWindow(BaseWindow):
 
         # Initialize variables
         self.wd = "C:/Users/USER/Downloads"
-        self.flink_1 = None
-        self.flink_2 = None
+        self.flink = {}
+        self.label_list = {"placefolder": None} # to keep track of the labels for the selected files
         self.image_lib = {}
         self.output_folder = "C:/Users/USER/Downloads"
         self.output_name = None
         self.full_output = "N/A"
 
-        # Build UI
-        layout = QVBoxLayout()
-        layout_explorer1 = QHBoxLayout()
-        layout_explorer2 = QHBoxLayout()
-        layout_output1 = QVBoxLayout()
-        layout_output2 = QHBoxLayout()
-        layout_reorder = QHBoxLayout()
-
-        # Entry of first PDF
-        button_explore1 = QPushButton("Select 1st PDF", self)
-        button_explore1.setStatusTip("Open one PDF to reorder")   
-        button_explore1.clicked.connect(self.explore_1st_file)
-        button_explore1.setFixedWidth(150)
-        layout_explorer1.addWidget(button_explore1)
-        # Label to show selected file
-        self.label_file1 = QLabel("No file selected", self)
-        self.label_file1.setAlignment(Qt.AlignmentFlag.AlignRight)
-        layout_explorer1.addWidget(self.label_file1)
-        layout.addLayout(layout_explorer1)
-        # Entry of second PDF
-        button_explore2 = QPushButton("Select 2nd PDF", self)
-        button_explore2.setStatusTip("Open second PDF to reorder and merge with first")   
-        button_explore2.clicked.connect(self.explore_2nd_file)
-        button_explore2.setFixedWidth(150)
-        layout_explorer2.addWidget(button_explore2)
-        # Label to show selected file
-        self.label_file2 = QLabel("No file selected", self)
-        self.label_file2.setAlignment(Qt.AlignmentFlag.AlignRight)
-        layout_explorer2.addWidget(self.label_file2)
-        layout.addLayout(layout_explorer2)
-        
-        # empty space
-        layout.addSpacing(10)
-
-        # Use the custom ReorderableImageView
-        # create unique session-id to save the images
+        # create the folder for the images with a unique id provided while widget-creation
         session_ident = f"run_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         img_folder = "created_images"
         wd = os.path.dirname(os.path.realpath(__file__))
         self.img_wd = "{}/{}/{}/".format(wd, img_folder, session_ident)
         os.makedirs(self.img_wd, exist_ok=True)
+
+        self.build_ui()
+
+    def build_ui(self) -> None:
+        # Layouts
+        layout = QVBoxLayout()
+        layout_fileSelection = QHBoxLayout()
+        self.layout_selectedFiles = QVBoxLayout()
+        layout_output = QHBoxLayout()
+        layout_reorder = QHBoxLayout()
+        
+
+        # File selection and presentation for PDFs
+        button_explorer = QPushButton("Select PDF", self)
+        button_explorer.setStatusTip("Select a PDF file to reorder")
+        button_explorer.clicked.connect(self.explore_file)
+        button_explorer.setFixedWidth(150)
+
+        choosen_file_label = QLabel("No file selected", self)
+        choosen_file_label.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.label_list["placefolder"] = choosen_file_label
+
+        layout_fileSelection.addWidget(button_explorer)
+        self.layout_selectedFiles.addWidget(choosen_file_label)
+        layout_fileSelection.addLayout(self.layout_selectedFiles)
+        layout.addLayout(layout_fileSelection)
+        # empty space
+        layout.addSpacing(10)
+
+        # Custom ReorderableImageView for displaying page thumbnails and allowing drag-drop reordering
         self.image_view = ReorderableImageView([], self.img_wd)
         self.image_view.setFixedHeight(int(QApplication.primaryScreen().availableGeometry().height() * 0.5))
+        
         layout.addWidget(self.image_view)
         
         # empty space
         layout.addSpacing(10)
 
-        # label for the button choosing the output folder and output name
+        # label and button for choosing the output folder and output name
         label_output = QLabel("Output:", self)
         effect = QGraphicsOpacityEffect(label_output)
         effect.setOpacity(0.4)
         label_output.setGraphicsEffect(effect)
-        layout_output2.addWidget(label_output)
-        # button to choose output folder and name
+
         button_output = QPushButton("Output Folder", self)
         button_output.clicked.connect(self.set_output_folder)
-        button_output.setStatusTip("Select the folder to save the resized PDF")
+        button_output.setStatusTip("Select the folder to save the reordered PDF")
         button_output.setEnabled(False)
         effect = QGraphicsOpacityEffect(button_output)
         effect.setOpacity(0.4)
         button_output.setGraphicsEffect(effect)
-        layout_output2.addWidget(button_output)
-        # input for output name
+
         input_output_name = QLineEdit()
         input_output_name.setPlaceholderText("Output File Name")
         input_output_name.setStatusTip("Enter the desired name for the output PDF file")
-        input_output_name.textChanged.connect(self.assemble_full_output)
+        input_output_name.textChanged.connect(lambda text: self.assemble_full_output(text))
         input_output_name.setEnabled(False)
         effect = QGraphicsOpacityEffect(input_output_name)
         effect.setOpacity(0.4)
         input_output_name.setGraphicsEffect(effect)
-        layout_output2.addWidget(input_output_name)
-        layout_output1.addLayout(layout_output2)
+
+        layout_output.addWidget(label_output)
+        layout_output.addWidget(button_output)
+        layout_output.addWidget(input_output_name)
+        layout.addLayout(layout_output)
+
         # label for whole output path
         self.label_full_output = QLabel("N/A", self)
         self.label_full_output.setAlignment(Qt.AlignmentFlag.AlignRight)
         effect = QGraphicsOpacityEffect(self.label_full_output)
         effect.setOpacity(0.4)
         self.label_full_output.setGraphicsEffect(effect) 
-        layout_output1.addWidget(self.label_full_output)
-        layout.addLayout(layout_output1)
+        layout.addWidget(self.label_full_output)
         
         # empty space
         layout.addSpacing(10)
 
-        # start reordering the pdfs
+        # button and label for reordering the pdfs
         button_reorder = QPushButton("Save current order", self)
         button_reorder.setStatusTip("Save the new order of pages to the output-file.")
         button_reorder.clicked.connect(self.reorder)
@@ -224,9 +221,10 @@ class ReorderPagesWindow(BaseWindow):
         effect = QGraphicsOpacityEffect(button_reorder)
         effect.setOpacity(0.4)
         button_reorder.setGraphicsEffect(effect)
-        layout_reorder.addWidget(button_reorder)
-        # lable for processing status
+        
         self.label_status = QLabel("", self)
+        
+        layout_reorder.addWidget(button_reorder)
         layout_reorder.addWidget(self.label_status)
         layout.addLayout(layout_reorder)
 
@@ -239,168 +237,27 @@ class ReorderPagesWindow(BaseWindow):
         container.setLayout(layout)
         self.setCentralWidget(container)
 
-    def closeEvent(self, event):
+    # region ======================= HELPER FUNCTIONS =======================
+    def closeEvent(self, event) -> None:
+        """Handle window close to show parent window."""
         if self.parent_window:
             self.parent_window.show()
         event.accept()
-
-    def print_order(self):
+    def print_order(self) -> list:
         """Print the current order of images."""
         order = self.image_view.get_order()
         # print("Current order:", order)
         return order
-    
     def update_wd(self, fname: str) -> None:
         """When choosing a new file, grab the folder and open the explorer there"""
         if fname:
             self.wd = os.path.dirname(fname)
         return None
-    
     def get_wd(self) -> str:
         """Get the current working directory for the explorer"""
         return self.wd
-    
-    # explore 1st file button handler
-    @pyqtSlot()
-    def explore_1st_file(self):
-        set = self.flink_1 != None
-        fname = QFileDialog.getOpenFileName(
-            self,
-            "Open File",
-            self.get_wd(),
-            "PDF Files (*.pdf)",
-        )
-        if fname[0] != "":
-            self.update_wd(fname[0])
-            if not set:
-                self.flink_1 = fname[0]
-                fname_file = self.flink_1.split("/")[-1] if self.flink_1 else "No file selected"
-                self.label_file1.setText(fname_file)
-                self.update_images(None, self.flink_1, 1)
-                set = True
-                self.show_interface_elements()
-            else:
-                old_flink = self.flink_1
-                self.flink_1 = fname[0]
-                fname_file = self.flink_1.split("/")[-1] if self.flink_1 else "No file selected"
-                self.label_file1.setText(fname_file)
-                self.update_images(old_flink, self.flink_1, 1)
-                set = True
-                self.show_interface_elements()
-        else:
-            if not set:
-                self.flink_1 = None
-                self.label_file1.setText("No file selected")
-                set = False
-                self.hide_interface_elements()
-            if set:
-                old_flink = self.flink_1
-                self.flink_1 = None
-                self.label_file1.setText("No file selected")
-                self.update_images(old_flink, None, 1)
-                set = False
-                self.hide_interface_elements()
-    
-    # explore 2nd file button handler
-    @pyqtSlot()
-    def explore_2nd_file(self):
-        set = self.flink_2 != None
-        fname = QFileDialog.getOpenFileName(
-            self,
-            "Open File",
-            self.get_wd(),
-            "PDF Files (*.pdf)",
-        )
-        if fname[0] != "":
-            self.update_wd(fname[0])
-            if not set:
-                self.flink_2 = fname[0]
-                fname_file = self.flink_2.split("/")[-1] if self.flink_2 else "No file selected"
-                self.label_file2.setText(fname_file)
-                self.update_images(None, self.flink_2, 2)
-                set = True
-                self.show_interface_elements()
-            else:
-                old_flink = self.flink_2
-                self.flink_2 = fname[0]
-                fname_file = self.flink_2.split("/")[-1] if self.flink_2 else "No file selected"
-                self.label_file2.setText(fname_file)
-                self.update_images(old_flink, self.flink_2, 2)
-                set = True
-                self.show_interface_elements()
-        else:
-            if not set:
-                self.flink_2 = None
-                self.label_file2.setText("No file selected")
-                set = False
-                self.hide_interface_elements()
-            if set:
-                old_flink = self.flink_2
-                self.flink_2 = None
-                self.label_file2.setText("No file selected")
-                self.update_images(old_flink, None, 2)
-                set = False
-                self.hide_interface_elements()
-
-    # extract images from the selected pdf
-    def extract_images(self, flink, explorer):
-        if not flink: return
-        doc = fitz.open(flink)
-        key = f"{datetime.now().strftime('%H%M%S')}"
-        self.image_lib[key] = [flink, explorer]
-        img_list = []
-        for i in range(doc.page_count):
-            page = doc.load_page(i)
-            # drastically reduce quality: scale down to 20%
-            pix = page.get_pixmap(matrix=fitz.Matrix(0.2, 0.2))
-            file = f"{key}_{i+1}.png"
-            img_list.append(file)
-            output = f"{self.img_wd}/{file}"
-            pix.save(output)
-        doc.close()
-        self.image_view.add_images(img_list)
-        return
-    
-    # remove images associated with a given file
-    def delete_images(self, flink, explorer):
-        if not flink: return
-        # find the key in self.image_lib that matches this file and explorer
-        target_key = None
-        for key, (stored_flink, stored_explorer) in list(self.image_lib.items()):
-            if stored_flink == flink and stored_explorer == explorer:
-                target_key = key
-                break
-        if not target_key:
-            print(f"No images found for file {flink}")
-            return
-        
-        # get all corresponding image filenames
-        prefix = f"{target_key}_"
-        image_files = [f for f in os.listdir(self.img_wd) if f.startswith(prefix)]
-
-        # remove each image from disk
-        for img_file in image_files:
-            try:
-                os.remove(os.path.join(self.img_wd, img_file))
-            except Exception as e:
-                print(f"Error deleting {img_file}: {e}")
-        
-        # remove from internal image list/view
-        self.image_view.remove_images(image_files)
-        del self.image_lib[target_key]
-
-        return
-
-    # removing or adding new images to folder
-    def update_images(self, remove_link = None, add_link = None, exp = None):
-        if exp:
-            if remove_link:
-                self.delete_images(remove_link, exp)
-            if add_link:
-                self.extract_images(add_link, exp)
-
-    # show/hide interface elements
     def show_interface_elements(self):
+        """Enable and show the interface elements once a file is selected."""
         for widget in self.findChildren((QLineEdit, QPushButton, QLabel, QDoubleSpinBox)):
             effect = widget.graphicsEffect()
             if effect and isinstance(effect, QGraphicsOpacityEffect):
@@ -408,32 +265,15 @@ class ReorderPagesWindow(BaseWindow):
                 effect.setOpacity(1.0)
                 widget.setGraphicsEffect(effect)
     def hide_interface_elements(self):
-        file1 = (self.flink_1 or "").strip()
-        file2 = (self.flink_2 or "").strip()
-        if not file1 and not file2:
-            for widget in self.findChildren((QLineEdit, QPushButton, QLabel, QDoubleSpinBox)):
-                effect = widget.graphicsEffect()
-                if effect and isinstance(effect, QGraphicsOpacityEffect):
-                    widget.setEnabled(False)
-                    effect.setOpacity(0.4)
-                    widget.setGraphicsEffect(effect)
-
-    # set output folder
-    @pyqtSlot()
-    def set_output_folder(self):
-        folder = QFileDialog.getExistingDirectory(
-            self,
-            "Select Output Folder",
-            self.get_wd(),
-        )
-        if folder != "":
-            self.output_folder = folder
-        else:
-            self.output_folder = "C:/Users/USER/Downloads"
-        self.assemble_full_output()
-
-    # update full output label
+        """Disable and hide the interface elements when no file is selected."""
+        for widget in self.findChildren((QLineEdit, QPushButton, QLabel, QDoubleSpinBox)):
+            effect = widget.graphicsEffect()
+            if effect and isinstance(effect, QGraphicsOpacityEffect):
+                widget.setEnabled(False)
+                effect.setOpacity(0.4)
+                widget.setGraphicsEffect(effect)
     def assemble_full_output(self, text: str = None):
+        '''Assemble the full output path from the output folder and output name, and update the label.'''
         # If called from QLineEdit.textChanged, update internal output_name
         if text is not None:
             if text != "":
@@ -462,71 +302,214 @@ class ReorderPagesWindow(BaseWindow):
             self.full_output = f"{folder}{sep}{name}"
 
         self.label_full_output.setText(self.full_output)
-   
-    # clean inputs and validate before starting
-    def clean_inputs(self, file1, file2, file_out):
-        safe = True
-        # normalize strings (handle None)
-        file1 = (file1 or "").strip()
-        file2 = (file2 or "").strip()
-        file_out = (file_out or "").strip()
-        # check individual inputs
-        valid_file1 = isinstance(file1, str) and os.path.isfile(file1) and file1.lower().endswith(".pdf")
-        valid_file2 = isinstance(file2, str) and os.path.isfile(file2) and file2.lower().endswith(".pdf")
-        # must have at least one valid input file
-        if not (valid_file1 or valid_file2):
-            safe = False
-        # check output file
-        # ensure output filename ends with .pdf
-        if not isinstance(file_out, str) or not file_out or not file_out.endswith(".pdf"):
-            safe = False
-        return safe, file1, file2, file_out
 
-    # start the reodering of th pdfs and saving to new file
-    def reorder(self):
-        flink1 = self.flink_1
-        flink2 = self.flink_2
-        file_out = self.full_output
+    # endregion
 
-        # validate inputs
-        self.label_status.setText("Checkig inputs...")
-        QApplication.processEvents()  # Update UI
-        safe, flink1, flink2, file_out = self.clean_inputs(flink1, flink2, file_out)
-        if not safe:
-            self.label_status.setText("❌ Ungültige Eingaben...")
+    # region ======================= ReorderableImageView Helpers =======================
+    def update_label_and_images(self, key: str) -> None:
+        """When choosing a new file, update the label and extract the images to show in the viewer."""
+        if key in self.flink.keys():
+            fname = self.flink[key]
+
+            self.label_status.setText("Extracting pages...")
             QApplication.processEvents()  # Update UI
-            return
+
+            self.extract_images(fname, key)
+            self.add_file_to_label(fname, key)
+            QApplication.processEvents()  # Update UI
+
+            self.label_status.setText("")
+            QApplication.processEvents()  # Update UI
+        return None
+    def extract_images(self, fname: str, key: str) -> None:
+        if not fname: return None
+        doc = fitz.open(fname)
+        key = key
+        self.image_lib[key] = fname
+        img_list = []
+        for i in range(doc.page_count):
+            page = doc.load_page(i)
+            # drastically reduce quality: scale down to 20%
+            pix = page.get_pixmap(matrix=fitz.Matrix(0.2, 0.2))
+            file = f"{key}_{i+1}.png"
+            img_list.append(file)
+            output = f"{self.img_wd}/{file}"
+            pix.save(output)
+        doc.close()
+        self.image_view.add_images(img_list)
+        return None
+    def add_file_to_label(self, fname: str, key: str) -> None:
+        """When choosing a new file, update the label to show the filename."""
+        fname_file = os.path.basename(fname)
+
+        placeholder = self.label_list.get("placefolder")
+        if placeholder is not None:
+            placeholder.hide()  # hide the placeholder label if it exists
+            self.show_interface_elements()  # show interface elements since a file is now selected
+
+        layout_fname = QHBoxLayout()
+        label = QLabel(fname_file, self)
+        button = QPushButton("X", self)
+        button.setFixedSize(20, 20)
+        button.clicked.connect(lambda: self.remove_file_from_label(key))
+        self.label_list[key] = layout_fname
+        layout_fname.addWidget(label)
+        layout_fname.addWidget(button)
+        layout_fname.setAlignment(Qt.AlignmentFlag.AlignRight)
+        self.layout_selectedFiles.addLayout(layout_fname)
+
+        #print(f"fname_file: {fname_file} | key: {key}")
+        return None
+    def remove_file_from_label(self, key: str) -> None:
+        """When clicking the 'X' button on a file label, remove the label and the corresponding images."""
+        layout = self.label_list.get(key)
+        if layout is not None:
+            # Remove all widgets from the layout
+            while layout.count():
+                item = layout.takeAt(0)
+                widget = item.widget()
+                if widget:
+                    widget.deleteLater()
+            # Remove the layout itself from the parent layout
+            self.layout_selectedFiles.removeItem(layout)
+            del self.label_list[key]
+            if len(self.label_list) == 1:  # if only the placeholder is left
+                placeholder = self.label_list.get("placefolder")
+                if placeholder is not None:
+                    placeholder.show()  # show the placeholder label again
+                    self.hide_interface_elements()  # hide interface elements since no file is selected
+            # Remove corresponding images
+            self.delete_images(key)
+        return None
+    def delete_images(self, key:str) -> None:
+        if not key: return None
+
+        prefix = f"{key}_"
+        image_files = [f for f in os.listdir(self.img_wd) if f.startswith(prefix)]
+        for img_file in image_files:
+            try:
+                os.remove(os.path.join(self.img_wd, img_file))
+            except Exception as e:
+                print(f"Error deleting {img_file}: {e}")
+
+        # remove from internal image list/view
+        self.image_view.remove_images(image_files)
+        if key in self.image_lib:
+            del self.image_lib[key]
+        return None
+    # endregion
+
+    # region ======================= Explorer Functions =======================
+    @pyqtSlot()
+    def explore_file(self) -> None:
+        """Open file exporer to sleect a file and update the ReorderableImageView with the new file's pages."""
+        fname = QFileDialog.getOpenFileName(
+            self,
+            "Open File",
+            self.get_wd(),
+            "PDF Files (*.pdf)",
+        )
+        key = datetime.now().strftime('%H%M%S%f')  # unique key based on timestamp
+        if fname[0] != "" and os.path.isfile(fname[0]):
+            if not fname[0].endswith(".pdf"): return None
+            self.update_wd(fname[0])    # next time the explorer opens, it will start in the same folder
+            self.flink[key] = fname[0]
+            self.update_label_and_images(key)
+    @pyqtSlot()
+    def set_output_folder(self):
+        '''Open file exporer to select an output folder and update the label with the new output path.'''
+        folder = QFileDialog.getExistingDirectory(
+            self,
+            "Select Output Folder",
+            self.get_wd(),
+        )
+        if folder != "":
+            self.output_folder = folder
+        else:
+            self.output_folder = "C:/Users/USER/Downloads"
+        self.assemble_full_output()
+
+    # endregion
+
+    # region ======================= Reordering Logic =======================
+    def validate_inputs(self) -> bool:
+        """clean and validate inputs before starting the reordering process."""
+
+        # at least one input file must be selected
+        if len(self.flink) == 0: return False
+        # check if all files are pdfs
+        for _, path in self.flink.items():
+            if not isinstance(path, str) or not path or not path.endswith(".pdf") or not os.path.isfile(path):
+                return False
+        # check if output path is valid
+        if not isinstance(self.full_output, str) or not self.full_output or not self.full_output.endswith(".pdf"):
+            return False
+        # check if output folder exists
+        output_folder = os.path.dirname(self.full_output)
+        if not os.path.isdir(output_folder):
+            return False
+        # check if output file already exists
+        if os.path.isfile(self.full_output):
+            msg = QMessageBox(self)
+            msg.setIcon(QMessageBox.Icon.Warning)
+            msg.setWindowTitle("Output File Exists")
+            msg.setText(f"The output file already exists:\n{self.full_output}\n\nDo you want to overwrite it?")
+            msg.setStandardButtons(QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+            response = msg.exec()
+            if response == QMessageBox.StandardButton.No:
+                return False
+            
+        # all inputs are valid
+        return True
+    def reorder(self) -> None:
+        """Start the reordering process after validating inputs, and save the new PDF to the output path."""
+        # validate inputs
+        if not self.validate_inputs():
+            self.label_status.setText("❌ Invalid inputs...")
+            QApplication.processEvents()  # Update UI
+            return None
         
         # logic for reordering
         self.label_status.setText("Reordering PDFs...")
         QApplication.processEvents()  # Update UI
-        if flink1: reader1 = PdfReader(flink1)
-        if flink2: reader2 = PdfReader(flink2)
+        
         merger = PdfWriter()
-        # get the order of images in viewer
-        pages = [f.split("/")[-1] for f in self.image_view.get_order()]
-        page_order = []
-        for p in pages:
-            key, num = p.strip().split(".")[0].split("_")
-            page_order.append((key, num))
+        reader = {}
+        for obj in self.image_view.get_order():
+            key = os.path.basename(obj).split("_")[0]
+            num = int(os.path.basename(obj).split("_")[1].split(".")[0]) - 1
+            file = self.image_lib[key]
+            #print(f"folder: {file} | num: {num}")
 
-        for key, num in page_order:
-            _, exp = self.image_lib[key]
-            if exp == 1:
-                merger.add_page(reader1.pages[int(num)-1])
-            elif exp == 2:
-                merger.add_page(reader2.pages[int(num)-1])
+            if key not in reader:
+                reader[key] = PdfReader(file)
+                if reader[key].is_encrypted:
+                    # try empty password first (some PDFs are "encrypted" but openable)
+                    try:
+                        reader[key].decrypt("")  # returns 0 if failed, 1/2 if success depending on pypdf version
+                    except Exception:
+                        pass
+
+                    if reader[key].is_encrypted:
+                        QMessageBox.warning(self, "Encrypted PDF",
+                                            f"PDF is encrypted and cannot be processed:\n{file}")
+                        return
+
+            page = reader[key].pages[num]
+            merger.add_page(page)
 
         # save them to the new file
         self.label_status.setText("Completed ✅")
-        merger.write(file_out)
+        merger.write(self.full_output)
         merger.close()
 
         dlg = QMessageBox(self)
         dlg.setWindowTitle("Reordering Completed")
         dlg.setFixedWidth(400)
-        dlg.setText(f"Reordering completed successfully!\n\nOutput file:\n{file_out}")
+        dlg.setText(f"Reordering completed successfully!\n\nOutput file:\n{self.full_output}")
         dlg.setIcon(QMessageBox.Icon.Information)
         dlg.exec()
 
-        return 
+        return None
+
+    # endregion
