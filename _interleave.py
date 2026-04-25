@@ -22,7 +22,7 @@ from PyQt6.QtWidgets import (
 
 class InterleavePagesWindow(BaseWindow):
     def __init__(self, parent=None):
-        super().__init__("Interleave PDFs", 500)
+        super().__init__("Interleave PDFs")
         self.parent_window = parent
 
         # Initialize variables

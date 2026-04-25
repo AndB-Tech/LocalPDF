@@ -117,10 +117,11 @@ class ReorderableImageView(QListView):
 
 class ReorderPagesWindow(BaseWindow):
     def __init__(self, parent=None):
-        super().__init__("Extract Pages", 840)
+        super().__init__("Extract Pages")
         self.parent_window = parent
 
         # Initialize variables
+        self.wd = "C:/Users/USER/Downloads"
         self.flink_1 = None
         self.flink_2 = None
         self.image_lib = {}
@@ -170,8 +171,7 @@ class ReorderPagesWindow(BaseWindow):
         self.img_wd = "{}/{}/{}/".format(wd, img_folder, session_ident)
         os.makedirs(self.img_wd, exist_ok=True)
         self.image_view = ReorderableImageView([], self.img_wd)
-        #self.image_view.setFixedHeight(600)
-        self.image_view.setFixedHeight(300)
+        self.image_view.setFixedHeight(int(QApplication.primaryScreen().availableGeometry().height() * 0.5))
         layout.addWidget(self.image_view)
         
         # empty space
@@ -247,8 +247,18 @@ class ReorderPagesWindow(BaseWindow):
     def print_order(self):
         """Print the current order of images."""
         order = self.image_view.get_order()
-        print("Current order:", order)
+        # print("Current order:", order)
         return order
+    
+    def update_wd(self, fname: str) -> None:
+        """When choosing a new file, grab the folder and open the explorer there"""
+        if fname:
+            self.wd = os.path.dirname(fname)
+        return None
+    
+    def get_wd(self) -> str:
+        """Get the current working directory for the explorer"""
+        return self.wd
     
     # explore 1st file button handler
     @pyqtSlot()
@@ -257,10 +267,11 @@ class ReorderPagesWindow(BaseWindow):
         fname = QFileDialog.getOpenFileName(
             self,
             "Open File",
-            "C:/USERS/USER/DOWNLOADS",
+            self.get_wd(),
             "PDF Files (*.pdf)",
         )
         if fname[0] != "":
+            self.update_wd(fname[0])
             if not set:
                 self.flink_1 = fname[0]
                 fname_file = self.flink_1.split("/")[-1] if self.flink_1 else "No file selected"
@@ -297,10 +308,11 @@ class ReorderPagesWindow(BaseWindow):
         fname = QFileDialog.getOpenFileName(
             self,
             "Open File",
-            "C:/USERS/USER/DOWNLOADS",
+            self.get_wd(),
             "PDF Files (*.pdf)",
         )
         if fname[0] != "":
+            self.update_wd(fname[0])
             if not set:
                 self.flink_2 = fname[0]
                 fname_file = self.flink_2.split("/")[-1] if self.flink_2 else "No file selected"
@@ -412,7 +424,7 @@ class ReorderPagesWindow(BaseWindow):
         folder = QFileDialog.getExistingDirectory(
             self,
             "Select Output Folder",
-            "C:/USERS/USER/DOWNLOADS",
+            self.get_wd(),
         )
         if folder != "":
             self.output_folder = folder

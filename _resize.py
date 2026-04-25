@@ -25,7 +25,7 @@ from PyQt6.QtWidgets import (
 
 class ResizePdfWindow(BaseWindow):
     def __init__(self, parent=None):
-        super().__init__("Resize PDFs", 500)
+        super().__init__("Resize PDFs")
         self.parent_window = parent
 
         # Initialize variables

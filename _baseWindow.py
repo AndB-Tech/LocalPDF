@@ -1,12 +1,25 @@
 import sys, os
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import (
-    QMainWindow, QStatusBar
+    QMainWindow, QStatusBar, QApplication
 )
 
 class BaseWindow(QMainWindow):
     """Base window class with shared setup."""
-    def __init__(self, title: str, width: int):
+    def __init__(self, title: str):
+        # get screen size and set window size to 1/3 of it
+        #   big: 1920x1032px (PC)
+        #  small: 1280x752px (Laptop)
+        self.screen = QApplication.primaryScreen().availableGeometry()
+        if self.screen.width() < 1500:
+            width = self.screen.width() // 2
+            height = self.screen.height() // 2
+        elif self.screen.width() < 2000:
+            width = self.screen.width() // 2
+            height = self.screen.height() // 2
+
+        #print(f"Screen size: {self.screen.width()}x{self.screen.height()}, Window size: {width}x{height}")
+
         super().__init__()
         self.setWindowTitle(title)
         self.setFixedWidth(width)

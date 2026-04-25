@@ -12,7 +12,8 @@ from _normalize import NormalizePagesWindow
 
 class MainWindow(BaseWindow):
     def __init__(self):
-        super().__init__("LocalPDF", 400)
+
+        super().__init__("LocalPDF")
 
         # Layout setup
         layout = QVBoxLayout()
