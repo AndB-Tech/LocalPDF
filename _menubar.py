@@ -3,7 +3,8 @@ from PyQt6.QtGui import QIcon, QAction
 from datetime import datetime
 import os
 
-from pypdf import PdfReader, PdfWriter
+from copy import copy
+from pypdf import PdfReader, PdfWriter, Transformation
 
 class MenuBar:
     def __init__(self, parent):
@@ -92,32 +93,42 @@ class MenuBar:
             page = int(basename.split("_page_")[1].split(".png")[0])
             file = self.parent.image_lib[key]
             if key not in reader:
-                if os.path.isfile(file):
-                    reader[key] = PdfReader(file)
+                if not os.path.isfile(file):
+                    QMessageBox.warning(self.parent, "Missing PDF",
+                                        f"PDF file could not be found:\n{file}")
+                    return
+
+                reader[key] = PdfReader(file)
+
                 if reader[key].is_encrypted:
                     try:
-                        reader[key].decrypt("")  # returns 0 if failed, 1/2 if success depending on pypdf version
+                        reader[key].decrypt("")
                     except Exception:
                         pass
 
                     if reader[key].is_encrypted:
-                        QMessageBox.warning(self.parent, "Encrypted PDF",
-                                            f"PDF is encrypted and cannot be processed:\n{file}")
+                        QMessageBox.warning(
+                            self.parent,
+                            "Encrypted PDF",
+                            f"PDF is encrypted and cannot be processed:\n{file}"
+                        )
                         return
                     
-            new_page = reader[key].pages[page]
-            merger.add_page(new_page)
+            new_page = copy(reader[key].pages[page])
 
-            # are therer any changes made to the page that need to be applied before saving?
             if self.parent.isModified:
-                # Rotation changes?
                 if key in self.parent.changes_made["rotate"]:
                     if page in self.parent.changes_made["rotate"][key]:
-                        if self.parent.changes_made["rotate"][key][page] != 0:
-                            merger.pages[-1].rotate(self.parent.changes_made["rotate"][key][page])
+                        rotation = self.parent.changes_made["rotate"][key][page]
+                        if rotation != 0:
+                            new_page.rotate(rotation)
+
+            new_page = self.normalize_page_to_a4(new_page)
+            merger.add_page(new_page)
             
         # save the merged PDF to the selected file path
-        merger.write(fname[0])
+        with open(fname[0], "wb") as f:
+            merger.write(f)
         merger.close()
 
         dlg = QMessageBox(self.parent)
@@ -125,6 +136,8 @@ class MenuBar:
         dlg.setText(f"PDF saved successfully to:\n{fname[0]}")
         dlg.setIcon(QMessageBox.Icon.Information)
         dlg.exec()
+
+        # TODO: add option to reduce size to specific MB if file is too large
 
     def add_pdf(self) -> None:
         """ Add a PDF file to the current workspace and display it in the viewer """
@@ -143,7 +156,37 @@ class MenuBar:
     
     def delete_pdf(self) -> None:
         """ Remove all pages from a PDF from the workspace """
-        files = self.parent.image_lib.keys()
+        files = list(self.parent.image_lib.keys())
         if not files: return
-        print(files)
+        print(files) # TODO: replace with a proper selection dialog
+    # endregion
+
+    # region ########## Helper Functions #############
+    def normalize_page_to_a4(self, page): # TODO: make this toggleable in a settings menu
+        """Apply A4 scaling/centering transform to a page."""
+        A4_WIDTH = 595.28
+        A4_HEIGHT = 841.89
+
+        page = copy(page)
+
+        orig_width = float(page.mediabox.width)
+        orig_height = float(page.mediabox.height)
+
+        if orig_width == 0 or orig_height == 0:
+            return page
+
+        scale = min(A4_WIDTH / orig_width, A4_HEIGHT / orig_height)
+
+        tx = (A4_WIDTH - orig_width * scale) / 2
+        ty = (A4_HEIGHT - orig_height * scale) / 2
+
+        page.add_transformation(
+            Transformation().scale(scale).translate(tx, ty)
+        )
+
+        page.mediabox.lower_left = (0, 0)
+        page.mediabox.upper_right = (A4_WIDTH, A4_HEIGHT)
+
+        return page
+    
     # endregion
