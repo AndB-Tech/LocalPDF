@@ -1,7 +1,14 @@
 # LocalPDF 📝
 
+### V0
+Simple scripts for manipulating PDF-files, including splitting, extracting and reducing the PDF files.
+
+### V1
 **LocalPDF** is a Windows desktop application for editing PDF files locally.  
 It provides tools for splitting, reordering, resizing, interleaving scanned pages, and normalizing page sizes to A4. Built with **Python** and **PyQt6**, it can be turned into a standalone executable.
+
+### V2
+**LocalPDF** in a new garment. Still a local and internet-independent application for editing PDFs to get away from big-brand or abo-driven applications. It provides tools for splitting, reordering, resizing, rotating and normalizing pages of PDFs. Built with **Python** and **PyQt6**, it can be turned into a standalone executable.
 
 ---
 
@@ -19,13 +26,14 @@ It provides tools for splitting, reordering, resizing, interleaving scanned page
 ## Features
 - **Split PDF**: Extract specific pages from a PDF.
 - **Reorder PDF**: Rearrange pages of "unlimited" PDFs visually in a GUI.
-- **Resize PDF**: Change file-size sizes of a PDF.
-- **Interleave Scanned Pages**: Merge even and odd pages from scanned documents.
+- **Resize PDF**: Change file-size sizes of a PDF. (Not currently in V2)
+- **Interleave Scanned Pages**: Merge even and odd pages from scanned documents. (Not currently in V2)
 - **Normalize Pages**: Resize all pages to A4.
+- **Seeting file**: Keep settings from session to session. (Only V2)
 
 ---
 
-## Project Structure
+## Project Structure V1
 
 - **app.py**  
   Main window containing all PDF tools.
@@ -47,6 +55,22 @@ It provides tools for splitting, reordering, resizing, interleaving scanned page
 
 - **_baseWindows.py**  
   Custom QMainWindow for Application.
+
+---
+
+## Project Structure V2
+
+- **app.py**
+  Main window containing PDF visualization and tools.
+  
+- **_toolbar.py**
+  Contains tools for page-moving, rotating and deletion.
+
+- **_menubar.py**
+  Contains tools for adding and saving the PDFs.
+
+- **_viewer.py**
+  Handles everything related to the preview.
 
 ---
 
